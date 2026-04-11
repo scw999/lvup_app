@@ -15,10 +15,23 @@ main = ".open-next/worker.js"
 compatibility_date = "2026-04-11"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
+# 백업 디버깅용 URL (lvup-app.<subdomain>.workers.dev) 유지.
+# 커스텀 도메인 추가 후 자동으로 꺼지는 걸 막기 위해 명시.
+workers_dev = true
+
 # OpenNext가 생성하는 정적 에셋 번들
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
+
+# 프로덕션 커스텀 도메인 (zone이 이 계정에 있어야 함)
+[[routes]]
+pattern = "lvup.world"
+custom_domain = true
+
+[[routes]]
+pattern = "www.lvup.world"
+custom_domain = true
 
 # ──────────────────────────────────────────────────────────
 # 앱 데이터베이스 (D1)
@@ -43,5 +56,5 @@ migrations_dir = "migrations"
 # 공개 환경 변수 (민감 정보는 wrangler secret put으로 관리)
 # ──────────────────────────────────────────────────────────
 [vars]
-APP_URL = "http://localhost:3000"
+APP_URL = "https://lvup.world"
 NODE_ENV = "production"
