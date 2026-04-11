@@ -1,0 +1,47 @@
+{
+  "name": "lvup-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LV UP — 현실에서 행동한 것이 상태창이 되는 성장 RPG형 PWA",
+  "homepage": "https://lvup.world",
+  "author": "scw999 <genesis@lvup.world>",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scw999/lvup_app.git"
+  },
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio",
+    "db:migrate:local": "wrangler d1 migrations apply lvup-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply lvup-db --remote"
+  },
+  "dependencies": {
+    "@opennextjs/cloudflare": "^1.19.1",
+    "drizzle-orm": "^0.45.2",
+    "next": "15.5.15",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260411.1",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.15",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wrangler": "^4.81.1"
+  }
+}

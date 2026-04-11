@@ -1,0 +1,48 @@
+#:schema node_modules/wrangler/config-schema.json
+
+# LV UP — Cloudflare Workers 설정 (OpenNext 어댑터 기반)
+#
+# 최초 1회 셋업 순서:
+#   1) npx wrangler login
+#   2) npx wrangler d1 create lvup-db
+#      → 출력된 database_id를 아래 [[d1_databases]] 블록의 placeholder에 붙여넣고 주석 해제
+#   3) npx wrangler r2 bucket create lvup-verifications   (Sprint 4에서 실제 사용)
+#      → 아래 [[r2_buckets]] 블록 주석 해제
+#   4) npx wrangler d1 migrations apply lvup-db --local   (Drizzle 마이그레이션 파일 준비 후)
+
+name = "lvup-app"
+main = ".open-next/worker.js"
+compatibility_date = "2026-04-11"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+
+# OpenNext가 생성하는 정적 에셋 번들
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+# ──────────────────────────────────────────────────────────
+# 앱 데이터베이스 (D1)
+# 원격 배포 전 반드시 `npx wrangler d1 create lvup-db`로 실제 DB를
+# 만들고 아래 database_id를 그 값으로 교체할 것.
+# 현재 값은 `--local` 전용 placeholder (로컬 SQLite는 database_name으로 관리).
+# ──────────────────────────────────────────────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "lvup-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# ──────────────────────────────────────────────────────────
+# 인증 이미지 저장소 (R2) — Sprint 4에서 본격 사용
+# `wrangler r2 bucket create lvup-verifications` 실행 후 주석 해제.
+# ──────────────────────────────────────────────────────────
+# [[r2_buckets]]
+# binding = "BUCKET"
+# bucket_name = "lvup-verifications"
+
+# ──────────────────────────────────────────────────────────
+# 공개 환경 변수 (민감 정보는 wrangler secret put으로 관리)
+# ──────────────────────────────────────────────────────────
+[vars]
+APP_URL = "http://localhost:3000"
+NODE_ENV = "production"
