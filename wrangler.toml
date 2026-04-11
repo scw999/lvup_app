@@ -22,14 +22,13 @@ binding = "ASSETS"
 
 # ──────────────────────────────────────────────────────────
 # 앱 데이터베이스 (D1)
-# 원격 배포 전 반드시 `npx wrangler d1 create lvup-db`로 실제 DB를
-# 만들고 아래 database_id를 그 값으로 교체할 것.
-# 현재 값은 `--local` 전용 placeholder (로컬 SQLite는 database_name으로 관리).
+# `wrangler d1 create lvup-db`로 생성된 원격 DB — APAC 리전.
+# 로컬은 `wrangler d1 migrations apply lvup-db --local`로 별도 관리.
 # ──────────────────────────────────────────────────────────
 [[d1_databases]]
 binding = "DB"
 database_name = "lvup-db"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "af04c328-4a78-4568-9436-06c3466ccc70"
 migrations_dir = "migrations"
 
 # ──────────────────────────────────────────────────────────

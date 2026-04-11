@@ -3,11 +3,12 @@
 // 왜 PBKDF2인가:
 //   - Web Crypto가 네이티브 지원 → workerd / Node 런타임 모두에서 동일하게 동작
 //   - bcrypt/argon2는 native bindings라 Workers Edge 환경에서 문제가 잦음
-//   - MVP 기준 보안 수준으로 충분 (2^17 iterations)
+//   - MVP 기준 보안 수준으로 충분 (100,000 iterations — workerd 상한)
 //
 // 저장 포맷: `{salt_hex}:{hash_hex}` — 마이그레이션 비용 없이 파라미터 교체 가능.
+// workerd는 PBKDF2 iterations > 100,000을 거부하므로 상한에 맞춰 고정.
 
-const ITERATIONS = 131_072; // 2^17
+const ITERATIONS = 100_000;
 const KEY_LENGTH_BITS = 256;
 const SALT_LENGTH_BYTES = 16;
 
