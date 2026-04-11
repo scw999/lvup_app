@@ -46,3 +46,15 @@ body {
   background: rgba(99, 102, 241, 0.35);
   color: #ffffff;
 }
+
+/* 온보딩 step 4 생성 연출 — Sprint 2 */
+@keyframes scanline {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

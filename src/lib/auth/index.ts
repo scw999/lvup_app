@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { readSessionCookie } from "./cookie";
 import { validateSessionToken, type SessionUser } from "./session";
 
@@ -21,6 +22,18 @@ export async function requireCurrentUser(): Promise<SessionUser> {
   const user = await getCurrentUser();
   if (!user) throw new Error("UNAUTHORIZED");
   return user;
+}
+
+// 온보딩이 끝난 사용자만 통과. (app) 그룹의 /status, /quests, /log, /settings의
+// 서버 컴포넌트 최상단에서 호출한다. 온보딩이 안 끝났으면 /onboarding으로,
+// 아예 로그인 안 됐으면 /login으로 redirect.
+export type OnboardedUser = SessionUser & { classCode: string };
+
+export async function requireOnboardedUser(): Promise<OnboardedUser> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+  if (user.classCode === null) redirect("/onboarding");
+  return user as OnboardedUser;
 }
 
 export { validateSessionToken, type SessionUser } from "./session";
