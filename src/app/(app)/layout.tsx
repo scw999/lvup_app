@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { BottomNav } from "@/components/layout/bottom-nav";
 
 // LV UP — (app) 그룹 레이아웃
 //
@@ -15,7 +16,7 @@ export default async function AppLayout({
   if (!user) redirect("/login");
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <header className="border-b border-[--color-border] bg-[--color-bg]/80 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
           <Link href="/status" className="text-sm font-bold tracking-[0.2em]">
@@ -26,7 +27,10 @@ export default async function AppLayout({
           </span>
         </div>
       </header>
-      <div className="mx-auto max-w-3xl px-6 py-10">{children}</div>
+      <div className="mx-auto w-full max-w-3xl flex-1 px-6 py-6 pb-24">
+        {children}
+      </div>
+      <BottomNav />
     </div>
   );
 }

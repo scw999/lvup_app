@@ -55,6 +55,9 @@ export type SessionUser = {
   nickname: string;
   level: number;
   title: string;
+  xp: number;
+  xpToNext: number;
+  streakDays: number;
   classCode: string | null;
 };
 
@@ -76,6 +79,9 @@ export async function validateSessionToken(token: string): Promise<{
       nickname: users.nickname,
       level: users.level,
       title: users.title,
+      xp: users.xp,
+      xpToNext: users.xpToNext,
+      streakDays: users.streakDays,
       classCode: users.classCode,
     })
     .from(sessions)
@@ -100,6 +106,9 @@ export async function validateSessionToken(token: string): Promise<{
       nickname: row.nickname,
       level: row.level,
       title: row.title,
+      xp: row.xp,
+      xpToNext: row.xpToNext,
+      streakDays: row.streakDays,
       classCode: row.classCode,
     },
   };
