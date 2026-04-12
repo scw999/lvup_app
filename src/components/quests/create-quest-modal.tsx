@@ -214,7 +214,7 @@ export function CreateQuestModal({
           disabled={submitting}
           className="w-full rounded-lg bg-[--color-accent] py-3 text-sm font-medium text-white transition-colors hover:bg-[--color-accent-hover] disabled:opacity-50"
         >
-          {submitting ? "생성 중..." : "���스트 생성"}
+          {submitting ? "생성 중..." : "퀘스트 생성"}
         </button>
       </form>
     </div>

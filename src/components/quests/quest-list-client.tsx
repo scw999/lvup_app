@@ -84,8 +84,8 @@ export function QuestListClient({
         <div className="py-16 text-center">
           <p className="text-sm text-[--color-text-faint]">
             {tab === "daily"
-              ? "활성 퀘���트가 없��니다"
-              : "커스텀 퀘스트를 ���들어보세요"}
+              ? "활성 퀘스트가 없습니다"
+              : "커스텀 퀘스트를 만들어보세요"}
           </p>
         </div>
       ) : (
