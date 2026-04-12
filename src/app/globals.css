@@ -47,6 +47,13 @@ body {
   color: #ffffff;
 }
 
+/* Safe area insets (노치/다이내믹 아일랜드 대응) */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
 /* 온보딩 step 4 생성 연출 — Sprint 2 */
 @keyframes scanline {
   from {

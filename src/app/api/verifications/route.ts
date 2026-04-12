@@ -8,7 +8,6 @@ import {
   questMedia,
   userStats,
   users,
-  growthLog,
   levelEvents,
 } from "@/lib/db/schema";
 import type { MainStatType } from "@/lib/db/schema";
