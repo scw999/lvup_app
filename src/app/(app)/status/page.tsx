@@ -8,6 +8,8 @@ import type { MainStatType } from "@/lib/db/schema";
 import { CLASS_INFO_BY_CODE } from "@/lib/onboarding/classes";
 import type { ClassCode } from "@/lib/db/schema";
 import { getStatDescriptor, STAT_LABELS } from "@/lib/stats/descriptors";
+import { StatRadar } from "@/components/status/stat-radar";
+import { ClassEmblem } from "@/components/status/class-emblem";
 
 export const metadata: Metadata = { title: "상태창" };
 
@@ -95,12 +97,17 @@ export default async function StatusPage() {
           </span>
         </div>
 
-        <h1 className="text-2xl font-bold tracking-tight">{user.nickname}</h1>
-        <div className="mt-1 flex items-center gap-3">
-          <span className="font-mono text-sm" style={{ color: classInfo.color }}>
-            Lv.{user.level}
-          </span>
-          <span className="text-sm text-[--color-text-muted]">{user.title}</span>
+        <div className="flex items-center gap-4">
+          <ClassEmblem classCode={user.classCode as ClassCode} color={classInfo.color} size={52} />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">{user.nickname}</h1>
+            <div className="mt-1 flex items-center gap-3">
+              <span className="font-mono text-sm" style={{ color: classInfo.color }}>
+                Lv.{user.level}
+              </span>
+              <span className="text-sm text-[--color-text-muted]">{user.title}</span>
+            </div>
+          </div>
         </div>
 
         {/* XP 바 */}
@@ -129,6 +136,20 @@ export default async function StatusPage() {
           </div>
         )}
       </section>
+
+      {/* ── 레이더 차트 ── */}
+      {stats && (
+        <section className="system-frame p-5">
+          <div className="mb-2 text-center">
+            <span className="system-text">ABILITY CHART</span>
+          </div>
+          <StatRadar stats={{
+            vitality: stats.vitality, focus: stats.focus,
+            execution: stats.execution, knowledge: stats.knowledge,
+            relationship: stats.relationship, influence: stats.influence,
+          }} />
+        </section>
+      )}
 
       {/* ── 6스탯 그리드 — 시스템 창 ── */}
       {stats && (

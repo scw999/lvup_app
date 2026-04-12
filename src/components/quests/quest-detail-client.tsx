@@ -23,20 +23,23 @@ export function QuestVerifyButton({
   questTitle,
   isCompleted,
   completedAt,
+  xpBase,
 }: {
   questId: string;
   questTitle: string;
   isCompleted: boolean;
   completedAt: string | null;
+  xpBase: number;
 }) {
   const [showVerify, setShowVerify] = useState(false);
   const [reward, setReward] = useState<RewardData | null>(null);
   const [completed, setCompleted] = useState(isCompleted);
+  const [quickCompleting, setQuickCompleting] = useState(false);
 
   if (completed) {
     return (
-      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-center">
-        <p className="text-sm text-emerald-400">완료된 퀘스트</p>
+      <div className="system-frame border-emerald-500/20 p-4 text-center">
+        <p className="text-sm text-emerald-400">임무 완료</p>
         {completedAt && (
           <p className="mt-1 text-[10px] text-[--color-text-faint]">
             {new Date(completedAt).toLocaleDateString("ko-KR")}
@@ -46,14 +49,49 @@ export function QuestVerifyButton({
     );
   }
 
+  // 빠른 완료 (사진 없이, 수행 XP만)
+  async function handleQuickComplete() {
+    setQuickCompleting(true);
+    try {
+      const res = await fetch("/api/verifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questId }),
+      });
+      if (!res.ok) {
+        setQuickCompleting(false);
+        return;
+      }
+      const { reward: r } = (await res.json()) as { reward: RewardData };
+      setReward(r);
+      setCompleted(true);
+    } catch {
+      setQuickCompleting(false);
+    }
+  }
+
   return (
     <>
-      <button
-        onClick={() => setShowVerify(true)}
-        className="w-full rounded-xl bg-[--color-accent] py-4 text-sm font-medium text-white transition-colors hover:bg-[--color-accent-hover]"
-      >
-        인증하기
-      </button>
+      {/* 2단계 액션 */}
+      <div className="flex flex-col gap-3">
+        {/* 메인: 사진 인증 (증빙 XP 보너스) */}
+        <button
+          onClick={() => setShowVerify(true)}
+          className="system-frame glow-soft w-full py-4 text-center text-sm font-medium text-[--color-accent] transition-all hover:bg-[--color-accent]/5 active:scale-[0.98]"
+        >
+          사진 인증하기
+          <span className="ml-2 text-[10px] text-[--color-xp]">+증빙 XP</span>
+        </button>
+
+        {/* 서브: 빠른 완료 (수행 XP만) */}
+        <button
+          onClick={handleQuickComplete}
+          disabled={quickCompleting}
+          className="w-full rounded-xl border border-[--color-border] py-3 text-center text-xs text-[--color-text-muted] transition-all hover:border-[--color-text-faint] hover:text-[--color-text] active:scale-[0.98] disabled:opacity-50"
+        >
+          {quickCompleting ? "처리 중..." : `완료 체크만 하기 (+${xpBase} XP)`}
+        </button>
+      </div>
 
       {showVerify && (
         <VerifyQuestModal

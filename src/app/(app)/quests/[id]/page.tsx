@@ -139,6 +139,7 @@ export default async function QuestDetailPage({
         questTitle={quest.title}
         isCompleted={quest.status === "completed"}
         completedAt={quest.completedAt}
+        xpBase={quest.xpRewardBase}
       />
     </main>
   );
