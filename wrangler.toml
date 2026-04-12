@@ -48,9 +48,9 @@ migrations_dir = "migrations"
 # 인증 이미지 저장소 (R2) — Sprint 4에서 본격 사용
 # `wrangler r2 bucket create lvup-verifications` 실행 후 주석 해제.
 # ──────────────────────────────────────────────────────────
-# [[r2_buckets]]
-# binding = "BUCKET"
-# bucket_name = "lvup-verifications"
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "lvup-verifications"
 
 # ──────────────────────────────────────────────────────────
 # 공개 환경 변수 (민감 정보는 wrangler secret put으로 관리)

@@ -58,6 +58,7 @@ export type SessionUser = {
   xp: number;
   xpToNext: number;
   streakDays: number;
+  lastActiveDate: string | null;
   classCode: string | null;
 };
 
@@ -82,6 +83,7 @@ export async function validateSessionToken(token: string): Promise<{
       xp: users.xp,
       xpToNext: users.xpToNext,
       streakDays: users.streakDays,
+      lastActiveDate: users.lastActiveDate,
       classCode: users.classCode,
     })
     .from(sessions)
@@ -109,6 +111,7 @@ export async function validateSessionToken(token: string): Promise<{
       xp: row.xp,
       xpToNext: row.xpToNext,
       streakDays: row.streakDays,
+      lastActiveDate: row.lastActiveDate,
       classCode: row.classCode,
     },
   };

@@ -5,6 +5,7 @@ import { requireOnboardedUser } from "@/lib/auth";
 import { getDb } from "@/lib/db/client";
 import { quests } from "@/lib/db/schema";
 import type { MainStatType, QuestDifficulty } from "@/lib/db/schema";
+import { QuestVerifyButton } from "@/components/quests/quest-detail-client";
 
 const STAT_COLOR_VAR: Record<MainStatType, string> = {
   vitality: "var(--color-vitality)",
@@ -130,25 +131,13 @@ export default async function QuestDetailPage({
         </div>
       </section>
 
-      {/* 인증하기 버튼 — Sprint 4에서 실제 인증 플로우 연결 */}
-      {isCompleted ? (
-        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-center">
-          <p className="text-sm text-emerald-400">완료된 퀘스트</p>
-          {quest.completedAt && (
-            <p className="mt-1 text-[10px] text-[--color-text-faint]">
-              {new Date(quest.completedAt).toLocaleDateString("ko-KR")}
-            </p>
-          )}
-        </div>
-      ) : (
-        <button
-          disabled
-          className="w-full rounded-xl bg-[--color-accent] py-4 text-sm font-medium text-white opacity-50"
-          title="인증 기능은 Sprint 4에서 개방됩니다"
-        >
-          인증하기 (곧 열림)
-        </button>
-      )}
+      {/* 인증하기 / 완료 상태 */}
+      <QuestVerifyButton
+        questId={quest.id}
+        questTitle={quest.title}
+        isCompleted={isCompleted}
+        completedAt={quest.completedAt}
+      />
     </main>
   );
 }
