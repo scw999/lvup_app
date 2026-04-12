@@ -68,9 +68,9 @@ export function QuestListClient({
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`flex-1 rounded-md py-2 text-xs tracking-wider transition-colors ${
+            className={`flex-1 rounded-md py-2 text-xs tracking-wider transition-all active:scale-95 ${
               tab === t
-                ? "bg-[--color-surface-alt] text-[--color-text]"
+                ? "bg-[--color-surface-alt] text-[--color-text] shadow-sm"
                 : "text-[--color-text-faint] hover:text-[--color-text-muted]"
             }`}
           >
@@ -143,21 +143,23 @@ export function QuestListClient({
         </ul>
       )}
 
-      {/* FAB — 커스텀 퀘스트 생성 */}
-      <button
-        onClick={() => setShowCreate(true)}
-        className="fixed bottom-20 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[--color-accent] text-white shadow-lg transition-transform hover:scale-105 hover:bg-[--color-accent-hover] active:scale-95"
-        aria-label="커스텀 퀘스트 만들기"
-      >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path
-            d="M10 4v12M4 10h12"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
-      </button>
+      {/* FAB — Custom 탭에서만 표시 */}
+      {tab === "custom" && (
+        <button
+          onClick={() => setShowCreate(true)}
+          className="fixed bottom-20 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[--color-accent] text-white shadow-lg transition-transform hover:scale-105 hover:bg-[--color-accent-hover] active:scale-95"
+          aria-label="커스텀 퀘스트 만들기"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path
+              d="M10 4v12M4 10h12"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+      )}
 
       {showCreate && (
         <CreateQuestModal

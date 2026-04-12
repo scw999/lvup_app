@@ -56,8 +56,14 @@ export function VerifyQuestModal({
     reader.readAsDataURL(file);
   }
 
+  const canSubmit = !!imageFile;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!imageFile) {
+      setError("사진을 첨부해주세요");
+      return;
+    }
     setSubmitting(true);
     setError("");
 
@@ -112,11 +118,11 @@ export function VerifyQuestModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4">
+      <div className="absolute inset-0" onClick={onClose} />
       <form
         onSubmit={handleSubmit}
-        className="relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-[--color-border] bg-[--color-bg] p-6 sm:rounded-2xl"
+        className="relative z-10 my-auto w-full max-w-md rounded-2xl border border-[--color-border] bg-[--color-bg] p-6"
       >
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-sm font-semibold tracking-wider">인증하기</h2>
@@ -141,7 +147,7 @@ export function VerifyQuestModal({
         {/* 사진 첨부 */}
         <div className="mb-4">
           <span className="mb-2 block text-[10px] tracking-wider text-[--color-text-faint]">
-            사진 (선택)
+            사진 <span className="text-red-400">*필수</span>
           </span>
           {imagePreview ? (
             <div className="relative">
@@ -220,10 +226,14 @@ export function VerifyQuestModal({
 
         <button
           type="submit"
-          disabled={submitting}
-          className="w-full rounded-lg bg-[--color-accent] py-3 text-sm font-medium text-white transition-colors hover:bg-[--color-accent-hover] disabled:opacity-50"
+          disabled={submitting || !canSubmit}
+          className="w-full rounded-lg bg-[--color-accent] py-3 text-sm font-medium text-white transition-colors hover:bg-[--color-accent-hover] disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {submitting ? uploadProgress || "처리 중..." : "인증 제출"}
+          {submitting
+            ? uploadProgress || "처리 중..."
+            : canSubmit
+              ? "인증 제출"
+              : "사진을 먼저 첨부하세요"}
         </button>
       </form>
     </div>

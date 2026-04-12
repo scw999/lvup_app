@@ -154,10 +154,10 @@ export function CreateQuestModal({
                 key={opt.value}
                 type="button"
                 onClick={() => setDifficulty(opt.value)}
-                className={`rounded-lg border py-2 text-center text-[10px] transition-colors ${
+                className={`rounded-lg border py-2 text-center text-[10px] transition-all active:scale-95 ${
                   difficulty === opt.value
-                    ? "border-[--color-accent] bg-[--color-accent]/10 text-[--color-accent]"
-                    : "border-[--color-border] text-[--color-text-faint] hover:border-[--color-text-faint]"
+                    ? "border-[--color-accent] bg-[--color-accent]/15 text-[--color-accent] shadow-[0_0_8px_rgba(99,102,241,0.3)]"
+                    : "border-[--color-border] text-[--color-text-faint] hover:border-[--color-text-muted]"
                 }`}
               >
                 <div className="font-medium">{opt.label}</div>
@@ -178,10 +178,10 @@ export function CreateQuestModal({
                 key={opt.value}
                 type="button"
                 onClick={() => setMainStatType(opt.value)}
-                className={`rounded-lg border py-2 text-center text-xs transition-colors ${
+                className={`rounded-lg border py-2 text-center text-xs transition-all active:scale-95 ${
                   mainStatType === opt.value
-                    ? "border-[--color-accent] bg-[--color-accent]/10 text-[--color-accent]"
-                    : "border-[--color-border] text-[--color-text-faint] hover:border-[--color-text-faint]"
+                    ? "border-[--color-accent] bg-[--color-accent]/15 text-[--color-accent] shadow-[0_0_8px_rgba(99,102,241,0.3)]"
+                    : "border-[--color-border] text-[--color-text-faint] hover:border-[--color-text-muted]"
                 }`}
               >
                 {opt.label}
