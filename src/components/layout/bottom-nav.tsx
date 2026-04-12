@@ -25,12 +25,15 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-1 flex-col items-center gap-1 py-3 text-[10px] tracking-wider transition-colors ${
+              className={`relative flex flex-1 flex-col items-center gap-1 py-3 text-[10px] tracking-wider transition-colors ${
                 active
                   ? "text-[--color-accent]"
                   : "text-[--color-text-faint] hover:text-[--color-text-muted]"
               }`}
             >
+              {active && (
+                <span className="absolute top-0 left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-full bg-[--color-accent]" style={{ boxShadow: "0 0 8px var(--color-accent-glow)" }} />
+              )}
               <Icon active={active} />
               {label}
             </Link>

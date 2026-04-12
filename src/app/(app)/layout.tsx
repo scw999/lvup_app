@@ -17,14 +17,19 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-[--color-border] bg-[--color-bg]/80 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <Link href="/status" className="text-sm font-bold tracking-[0.2em]">
+      <header className="border-b border-[--color-border] bg-[--color-bg]/90 backdrop-blur-lg">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3">
+          <Link href="/status" className="text-sm font-bold tracking-[0.25em] text-[--color-accent]">
             LV UP
           </Link>
-          <span className="text-xs text-[--color-text-faint]">
-            {user.nickname} · Lv.{user.level}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[11px] text-[--color-accent]">
+              Lv.{user.level}
+            </span>
+            <span className="text-[11px] text-[--color-text-faint]">
+              {user.nickname}
+            </span>
+          </div>
         </div>
       </header>
       <div className="mx-auto w-full max-w-3xl flex-1 px-6 py-6 pb-24">
