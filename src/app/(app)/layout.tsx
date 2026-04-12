@@ -22,13 +22,21 @@ export default async function AppLayout({
           <Link href="/status" className="text-sm font-bold tracking-[0.25em] text-[--color-accent]">
             LV UP
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span className="font-mono text-[11px] text-[--color-accent]">
               Lv.{user.level}
             </span>
             <span className="text-[11px] text-[--color-text-faint]">
               {user.nickname}
             </span>
+            <form action="/api/auth/logout" method="post">
+              <button
+                type="submit"
+                className="text-[10px] text-[--color-text-faint] hover:text-[--color-text-muted]"
+              >
+                logout
+              </button>
+            </form>
           </div>
         </div>
       </header>

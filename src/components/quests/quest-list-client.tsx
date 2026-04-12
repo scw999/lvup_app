@@ -79,8 +79,8 @@ export function QuestListClient({ initialQuests }: { initialQuests: Quest[] }) {
         <div className="system-frame py-16 text-center">
           <p className="text-sm text-[--color-text-faint]">
             {tab === "daily"
-              ? "&#8212; 할당된 임무가 없습니다 &#8212;"
-              : "&#8212; 나만의 퀘스트를 만들어보세요 &#8212;"}
+              ? "&mdash; 할당된 임무가 없습니다 &mdash;"
+              : "&mdash; 나만의 퀘스트를 만들어보세요 &mdash;"}
           </p>
         </div>
       ) : (

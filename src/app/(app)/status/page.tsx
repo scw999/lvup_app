@@ -211,7 +211,7 @@ export default async function StatusPage() {
       ) : (
         <section className="system-frame p-6 text-center">
           <p className="text-sm text-[--color-text-faint]">
-            &#8212; 오늘의 모험은 아직 시작되지 않았다 &#8212;
+            &mdash; 오늘의 모험은 아직 시작되지 않았다 &mdash;
           </p>
           <Link
             href="/quests"
