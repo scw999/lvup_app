@@ -14,9 +14,9 @@ const STATS: { key: MainStatType; label: string; color: string }[] = [
   { key: "influence", label: "전파", color: "var(--color-influence)" },
 ];
 
-const CX = 120;
-const CY = 120;
-const R = 90; // max radius
+const CX = 150;
+const CY = 150;
+const R = 110; // max radius
 
 function polarToXY(angle: number, radius: number): [number, number] {
   const rad = ((angle - 90) * Math.PI) / 180;
@@ -52,7 +52,7 @@ export function StatRadar({
 
   return (
     <div className="flex flex-col items-center">
-      <svg viewBox="0 0 240 240" className="h-52 w-52">
+      <svg viewBox="0 0 300 300" className="h-72 w-72">
         {/* Grid lines */}
         {[0.25, 0.5, 0.75, 1].map((scale) => (
           <polygon
@@ -98,7 +98,7 @@ export function StatRadar({
           return (
             <circle
               key={i}
-              cx={x} cy={y} r="3"
+              cx={x} cy={y} r="4"
               fill={STATS[i].color}
               filter="url(#glow)"
             />
@@ -108,7 +108,7 @@ export function StatRadar({
         {/* Labels */}
         {STATS.map((s, i) => {
           const angle = (360 / 6) * i;
-          const [x, y] = polarToXY(angle, R + 18);
+          const [x, y] = polarToXY(angle, R + 22);
           return (
             <text
               key={s.key}
@@ -116,7 +116,7 @@ export function StatRadar({
               textAnchor="middle"
               dominantBaseline="middle"
               fill={s.color}
-              fontSize="9"
+              fontSize="11"
               fontFamily="var(--font-sans)"
             >
               {s.label}
@@ -128,7 +128,7 @@ export function StatRadar({
         {values.map((v, i) => {
           const angle = (360 / 6) * i;
           const r = (Math.min(v, maxVal) / maxVal) * R;
-          const labelR = Math.max(r + 12, 20);
+          const labelR = Math.max(r + 14, 24);
           const [x, y] = polarToXY(angle, labelR);
           return (
             <text
@@ -137,7 +137,7 @@ export function StatRadar({
               textAnchor="middle"
               dominantBaseline="middle"
               fill="var(--color-text)"
-              fontSize="10"
+              fontSize="13"
               fontWeight="bold"
               fontFamily="var(--font-mono)"
             >
