@@ -111,6 +111,13 @@ body {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+.xp-bar-track {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.04);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.04);
+}
 .xp-bar-fill {
   background: linear-gradient(
     90deg,
@@ -120,6 +127,7 @@ body {
   );
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
+  box-shadow: 0 0 10px var(--color-accent-glow);
 }
 
 /* ── 스트릭 불꽃 ── */
@@ -134,28 +142,65 @@ body {
 
 /* ── 스탯 바 ── */
 .stat-bar-track {
-  height: 3px;
-  border-radius: 2px;
+  height: 5px;
+  border-radius: 3px;
   background: rgba(255,255,255,0.06);
   overflow: hidden;
 }
 .stat-bar-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: 3px;
   transition: width 0.6s ease-out;
+  box-shadow: 0 0 6px currentColor;
 }
 
 /* ── 시스템 텍스트 스타일 ── */
 .system-text {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--color-text-faint);
+  font-weight: 500;
 }
 .system-label {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.15em;
   color: var(--color-text-faint);
+}
+
+/* ── 섹션 디바이더 ── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-divider::before,
+.section-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border-glow), transparent);
+}
+
+/* ── 스탯 카드 호버 글로우 ── */
+.stat-card-glow {
+  position: relative;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  transition: border-color 0.3s, box-shadow 0.3s;
+  overflow: hidden;
+}
+.stat-card-glow::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 10px 10px 0 0;
+  background: var(--stat-color, var(--color-accent));
+  opacity: 0.6;
 }
 
 /* ── 퀘스트 카드 사이드 인디케이터 ── */

@@ -26,7 +26,6 @@ const STAT_ORDER: MainStatType[] = [
   "vitality", "focus", "execution", "knowledge", "relationship", "influence",
 ];
 
-// 스탯 바 퍼센트 (max 100 기준으로 시각화, 실제 상한 없음)
 function statPercent(val: number): number {
   return Math.min(100, Math.round((val / 60) * 100));
 }
@@ -77,20 +76,24 @@ export default async function StatusPage() {
 
   const xpPct = user.xpToNext > 0 ? Math.min(100, Math.round((user.xp / user.xpToNext) * 100)) : 0;
 
+  // 총 스탯 합산
+  const totalStat = stats
+    ? STAT_ORDER.reduce((sum, key) => sum + (stats[key] as number), 0)
+    : 0;
+
   return (
-    <main className="flex flex-col gap-6 pb-8">
-      {/* ── 캐릭터 헤더 — 클래스 컬러 그라디언트 배경 ── */}
+    <main className="flex flex-col gap-5 pb-8">
+      {/* ── 캐릭터 헤더 ── */}
       <section
         className="system-frame relative overflow-hidden p-6"
         style={{
-          background: `radial-gradient(ellipse at top, ${classInfo.color}08 0%, var(--color-surface) 70%)`,
+          background: `radial-gradient(ellipse at top, ${classInfo.color}10 0%, var(--color-surface) 70%)`,
         }}
       >
-        {/* 시스템 타이틀바 */}
         <div className="mb-4 flex items-center justify-between">
           <span className="system-text">STATUS WINDOW</span>
           <span
-            className="rounded-full border px-2.5 py-0.5 text-[10px] tracking-[0.2em]"
+            className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-[0.15em]"
             style={{ borderColor: `${classInfo.color}60`, color: classInfo.color }}
           >
             {classInfo.label}
@@ -99,10 +102,10 @@ export default async function StatusPage() {
 
         <div className="flex items-center gap-4">
           <ClassEmblem classCode={user.classCode as ClassCode} color={classInfo.color} size={52} />
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-bold tracking-tight">{user.nickname}</h1>
             <div className="mt-1 flex items-center gap-3">
-              <span className="font-mono text-sm" style={{ color: classInfo.color }}>
+              <span className="font-mono text-sm font-semibold" style={{ color: classInfo.color }}>
                 Lv.{user.level}
               </span>
               <span className="text-sm text-[--color-text-muted]">{user.title}</span>
@@ -110,37 +113,45 @@ export default async function StatusPage() {
           </div>
         </div>
 
-        {/* XP 바 */}
+        {/* XP 바 — 더 두껍고 명확하게 */}
         <div className="mt-5">
           <div className="mb-1.5 flex justify-between">
             <span className="system-label">EXPERIENCE</span>
-            <span className="font-mono text-[11px] text-[--color-text-muted]">
+            <span className="font-mono text-xs text-[--color-text-muted]">
               {user.xp} / {user.xpToNext}
+              <span className="ml-1.5 text-[--color-accent]">({xpPct}%)</span>
             </span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.04]">
+          <div className="xp-bar-track">
             <div
-              className="xp-bar-fill h-full rounded-full"
+              className="xp-bar-fill h-full rounded-[3px]"
               style={{ width: `${xpPct}%` }}
             />
           </div>
         </div>
 
-        {/* 스트릭 */}
-        {user.streakDays > 0 && (
-          <div className="mt-3 flex items-center gap-1.5">
-            <span className="streak-flame text-sm">&#128293;</span>
-            <span className="font-mono text-xs text-[--color-vitality]">
-              {user.streakDays}일 연속
-            </span>
-          </div>
-        )}
+        {/* 스트릭 + 총 전투력 */}
+        <div className="mt-3 flex items-center justify-between">
+          {user.streakDays > 0 ? (
+            <div className="flex items-center gap-1.5">
+              <span className="streak-flame text-sm">&#128293;</span>
+              <span className="font-mono text-xs text-[--color-vitality]">
+                {user.streakDays}일 연속
+              </span>
+            </div>
+          ) : (
+            <div />
+          )}
+          <span className="font-mono text-xs text-[--color-text-faint]">
+            TOTAL PWR <span className="font-semibold text-[--color-text-muted]">{totalStat}</span>
+          </span>
+        </div>
       </section>
 
-      {/* ── 레이더 차트 ── */}
+      {/* ── 어빌리티 차트 ── */}
       {stats && (
-        <section className="system-frame p-5">
-          <div className="mb-2 text-center">
+        <section className="system-frame px-4 py-5">
+          <div className="section-divider mb-1">
             <span className="system-text">ABILITY CHART</span>
           </div>
           <StatRadar stats={{
@@ -151,7 +162,7 @@ export default async function StatusPage() {
         </section>
       )}
 
-      {/* ── 6스탯 그리드 — 시스템 창 ── */}
+      {/* ── 6스탯 그리드 ── */}
       {stats && (
         <section className="system-frame p-5">
           <div className="mb-4 flex items-center justify-between">
@@ -164,32 +175,35 @@ export default async function StatusPage() {
               const d = delta7d[key];
               const color = STAT_COLOR[key];
               return (
-                <div key={key} className="stat-card p-3.5">
+                <div
+                  key={key}
+                  className="stat-card-glow p-3.5"
+                  style={{ "--stat-color": color } as React.CSSProperties}
+                >
                   <div className="mb-2 flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span
-                        className="inline-block h-1.5 w-1.5 rounded-full"
+                        className="inline-block h-2 w-2 rounded-full"
                         style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}` }}
                       />
-                      <span className="text-[11px] text-[--color-text-muted]">
+                      <span className="text-xs text-[--color-text-muted]">
                         {STAT_LABELS[key]}
                       </span>
                     </div>
                     {d > 0 && (
-                      <span className="font-mono text-[10px] text-emerald-400">+{d}</span>
+                      <span className="font-mono text-[11px] font-medium text-emerald-400">+{d}</span>
                     )}
                   </div>
                   <div className="font-mono text-3xl font-bold leading-none" style={{ color }}>
                     {val}
                   </div>
-                  {/* 스탯 바 */}
-                  <div className="stat-bar-track mt-2">
+                  <div className="stat-bar-track mt-2.5">
                     <div
                       className="stat-bar-fill"
-                      style={{ width: `${statPercent(val)}%`, backgroundColor: color }}
+                      style={{ width: `${statPercent(val)}%`, backgroundColor: color, color }}
                     />
                   </div>
-                  <p className="mt-1.5 text-[10px] text-[--color-text-faint]">
+                  <p className="mt-2 text-[11px] text-[--color-text-faint]">
                     {getStatDescriptor(val)}
                   </p>
                 </div>
@@ -224,7 +238,7 @@ export default async function StatusPage() {
                 {STAT_LABELS[mainQuest.mainStatType as MainStatType]} +{mainQuest.statReward}
               </span>
             </div>
-            <div className="mt-4 rounded-lg bg-[--color-accent]/10 py-2.5 text-center text-xs font-medium text-[--color-accent]">
+            <div className="mt-4 rounded-lg bg-[--color-accent]/10 py-2.5 text-center text-sm font-medium text-[--color-accent]">
               인증하러 가기
             </div>
           </section>
