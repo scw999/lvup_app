@@ -79,13 +79,31 @@ export function QuestListClient({
         ))}
       </div>
 
+      {/* Custom 탭 — 상단에 큰 생성 버튼 */}
+      {tab === "custom" && (
+        <button
+          onClick={() => setShowCreate(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[--color-accent]/40 bg-[--color-accent]/5 py-4 text-sm text-[--color-accent] transition-all hover:border-[--color-accent] hover:bg-[--color-accent]/10 active:scale-[0.98]"
+        >
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+            <path
+              d="M10 4v12M4 10h12"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+          새 퀘스트 만들기
+        </button>
+      )}
+
       {/* 퀘스트 카드 리스트 */}
       {filtered.length === 0 ? (
-        <div className="py-16 text-center">
+        <div className="py-12 text-center">
           <p className="text-sm text-[--color-text-faint]">
             {tab === "daily"
               ? "활성 퀘스트가 없습니다"
-              : "커스텀 퀘스트를 만들어보세요"}
+              : "아직 커스텀 퀘스트가 없습니다"}
           </p>
         </div>
       ) : (
@@ -94,7 +112,7 @@ export function QuestListClient({
             <li key={q.id}>
               <Link
                 href={`/quests/${q.id}`}
-                className="flex items-start gap-4 rounded-xl border border-[--color-border] bg-[--color-surface] p-4 transition-colors hover:border-[--color-accent]/30"
+                className="flex items-start gap-4 rounded-xl border border-[--color-border] bg-[--color-surface] p-4 transition-all hover:border-[--color-accent]/30 active:scale-[0.98]"
               >
                 {/* 스탯 색 점 */}
                 <span
@@ -107,7 +125,6 @@ export function QuestListClient({
                 <div className="flex-1">
                   <h3 className="text-sm font-medium">{q.title}</h3>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    {/* 난이도 뱃지 */}
                     <span
                       className={`rounded border px-1.5 py-0.5 text-[10px] ${
                         DIFFICULTY_COLOR[q.difficulty as QuestDifficulty]
@@ -115,17 +132,14 @@ export function QuestListClient({
                     >
                       {DIFFICULTY_LABEL[q.difficulty as QuestDifficulty]}
                     </span>
-                    {/* 시간 */}
                     {q.estimatedMinutes && (
                       <span className="text-[10px] text-[--color-text-faint]">
                         {q.estimatedMinutes}분
                       </span>
                     )}
-                    {/* XP */}
                     <span className="text-[10px] text-[--color-text-faint]">
                       +{q.xpRewardBase} XP
                     </span>
-                    {/* 스탯 */}
                     <span
                       className="text-[10px]"
                       style={{
@@ -141,24 +155,6 @@ export function QuestListClient({
             </li>
           ))}
         </ul>
-      )}
-
-      {/* FAB — Custom 탭에서만 표시 */}
-      {tab === "custom" && (
-        <button
-          onClick={() => setShowCreate(true)}
-          className="fixed bottom-20 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[--color-accent] text-white shadow-lg transition-transform hover:scale-105 hover:bg-[--color-accent-hover] active:scale-95"
-          aria-label="커스텀 퀘스트 만들기"
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M10 4v12M4 10h12"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
       )}
 
       {showCreate && (

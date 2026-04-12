@@ -82,16 +82,16 @@ export function CreateQuestModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4">
       {/* overlay */}
       <div
-        className="absolute inset-0 bg-black/60"
+        className="absolute inset-0"
         onClick={onClose}
       />
       {/* modal */}
       <form
         onSubmit={handleSubmit}
-        className="relative z-10 w-full max-w-md rounded-t-2xl border border-[--color-border] bg-[--color-bg] p-6 sm:rounded-2xl"
+        className="relative z-10 my-auto w-full max-w-md rounded-2xl border border-[--color-border] bg-[--color-bg] p-6"
       >
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-sm font-semibold tracking-wider">
@@ -149,21 +149,27 @@ export function CreateQuestModal({
             난이도
           </legend>
           <div className="grid grid-cols-4 gap-2">
-            {DIFFICULTY_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setDifficulty(opt.value)}
-                className={`rounded-lg border py-2 text-center text-[10px] transition-all active:scale-95 ${
-                  difficulty === opt.value
-                    ? "border-[--color-accent] bg-[--color-accent]/15 text-[--color-accent] shadow-[0_0_8px_rgba(99,102,241,0.3)]"
-                    : "border-[--color-border] text-[--color-text-faint] hover:border-[--color-text-muted]"
-                }`}
-              >
-                <div className="font-medium">{opt.label}</div>
-                <div className="mt-0.5 opacity-60">{opt.desc}</div>
-              </button>
-            ))}
+            {DIFFICULTY_OPTIONS.map((opt) => {
+              const selected = difficulty === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setDifficulty(opt.value)}
+                  className={`relative rounded-lg border py-2.5 text-center text-[10px] transition-all active:scale-95 ${
+                    selected
+                      ? "border-[--color-accent] bg-[--color-accent]/15 text-[--color-accent]"
+                      : "border-[--color-border] text-[--color-text-faint] hover:border-[--color-text-muted]"
+                  }`}
+                >
+                  {selected && (
+                    <span className="absolute right-1 top-1 text-[8px]">&#10003;</span>
+                  )}
+                  <div className="font-medium">{opt.label}</div>
+                  <div className="mt-0.5 opacity-60">{opt.desc}</div>
+                </button>
+              );
+            })}
           </div>
         </fieldset>
 
@@ -173,20 +179,26 @@ export function CreateQuestModal({
             연결 스탯
           </legend>
           <div className="grid grid-cols-3 gap-2">
-            {STAT_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setMainStatType(opt.value)}
-                className={`rounded-lg border py-2 text-center text-xs transition-all active:scale-95 ${
-                  mainStatType === opt.value
-                    ? "border-[--color-accent] bg-[--color-accent]/15 text-[--color-accent] shadow-[0_0_8px_rgba(99,102,241,0.3)]"
-                    : "border-[--color-border] text-[--color-text-faint] hover:border-[--color-text-muted]"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
+            {STAT_OPTIONS.map((opt) => {
+              const selected = mainStatType === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setMainStatType(opt.value)}
+                  className={`relative rounded-lg border py-2.5 text-center text-xs transition-all active:scale-95 ${
+                    selected
+                      ? "border-[--color-accent] bg-[--color-accent]/15 text-[--color-accent]"
+                      : "border-[--color-border] text-[--color-text-faint] hover:border-[--color-text-muted]"
+                  }`}
+                >
+                  {selected && (
+                    <span className="absolute right-1 top-1 text-[8px]">&#10003;</span>
+                  )}
+                  {opt.label}
+                </button>
+              );
+            })}
           </div>
         </fieldset>
 
