@@ -78,69 +78,63 @@ export async function POST(request: NextRequest) {
   const textOnly = !representativeImageUrl ? 1 : 0;
   const statType = reward.statType as MainStatType;
 
-  // ── 트랜잭션 시작 ──
-  // D1 batch: 모든 쿼리를 한 번에 보내 단일 트랜잭션으로 실행
-  const statColumn = statType;
+  // ── 순차 처리 (D1 batch에서 raw SQL 비호환 이슈로 분리) ──
 
-  // D1의 batch API 사용
-  await db.batch([
-    // 1. verification 생성
-    db.insert(verifications).values({
-      id: verificationId,
-      questId,
-      userId: user.id,
-      note: note?.trim() || null,
-      representativeImageUrl: representativeImageUrl || null,
-      linkUrl: linkUrl || null,
-      textOnly,
-      xpBaseEarned: reward.xpBase,
-      xpEvidenceEarned: reward.xpEvidence,
-      xpBonusEarned: reward.xpBonus,
-      xpTotalEarned: reward.xpTotal,
-      narrativeMessage: reward.narrativeMessage,
-    }),
+  // 1. verification 생성
+  await db.insert(verifications).values({
+    id: verificationId,
+    questId,
+    userId: user.id,
+    note: note?.trim() || null,
+    representativeImageUrl: representativeImageUrl || null,
+    linkUrl: linkUrl || null,
+    textOnly,
+    xpBaseEarned: reward.xpBase,
+    xpEvidenceEarned: reward.xpEvidence,
+    xpBonusEarned: reward.xpBonus,
+    xpTotalEarned: reward.xpTotal,
+    narrativeMessage: reward.narrativeMessage,
+  });
 
-    // 2. quest 완료 처리
-    db
-      .update(quests)
-      .set({ status: "completed", completedAt: now })
-      .where(eq(quests.id, questId)),
+  // 2. quest 완료 처리
+  await db
+    .update(quests)
+    .set({ status: "completed", completedAt: now })
+    .where(eq(quests.id, questId));
 
-    // 3. user xp / level / title 반영
-    db
-      .update(users)
-      .set({
-        xp: levelResult.newXp,
-        xpToNext: levelResult.newXpToNext,
-        level: levelResult.newLevel,
-        title: levelResult.newTitle,
-        lastActiveDate: today,
-        updatedAt: now,
-      })
-      .where(eq(users.id, user.id)),
+  // 3. user xp / level / title 반영
+  await db
+    .update(users)
+    .set({
+      xp: levelResult.newXp,
+      xpToNext: levelResult.newXpToNext,
+      level: levelResult.newLevel,
+      title: levelResult.newTitle,
+      lastActiveDate: today,
+      updatedAt: now,
+    })
+    .where(eq(users.id, user.id));
 
-    // 4. user_stats 증가
-    db
-      .update(userStats)
-      .set({
-        [statColumn]: sql`${userStats[statColumn]} + ${reward.statDelta}`,
-        updatedAt: now,
-      })
-      .where(eq(userStats.userId, user.id)),
+  // 4. user_stats 증가 — 동적 컬럼을 raw SQL로 처리
+  await db.run(sql`
+    UPDATE user_stats
+    SET ${sql.raw(statType)} = ${sql.raw(statType)} + ${reward.statDelta},
+        updated_at = ${now}
+    WHERE user_id = ${user.id}
+  `);
 
-    // 5. growth_log upsert (해당 날짜 행이 있으면 누적, 없으면 생성)
-    db.run(sql`
-      INSERT INTO growth_log (id, user_id, date, quests_completed, xp_earned,
-        ${sql.raw(`${statType}_delta`)}, level_at_end, created_at)
-      VALUES (${newGrowthLogId()}, ${user.id}, ${today}, 1, ${reward.xpTotal},
-        ${reward.statDelta}, ${levelResult.newLevel}, ${now})
-      ON CONFLICT (user_id, date) DO UPDATE SET
-        quests_completed = quests_completed + 1,
-        xp_earned = xp_earned + ${reward.xpTotal},
-        ${sql.raw(`${statType}_delta`)} = ${sql.raw(`${statType}_delta`)} + ${reward.statDelta},
-        level_at_end = ${levelResult.newLevel}
-    `),
-  ]);
+  // 5. growth_log upsert
+  await db.run(sql`
+    INSERT INTO growth_log (id, user_id, date, quests_completed, xp_earned,
+      ${sql.raw(`${statType}_delta`)}, level_at_end, created_at)
+    VALUES (${newGrowthLogId()}, ${user.id}, ${today}, 1, ${reward.xpTotal},
+      ${reward.statDelta}, ${levelResult.newLevel}, ${now})
+    ON CONFLICT (user_id, date) DO UPDATE SET
+      quests_completed = quests_completed + 1,
+      xp_earned = xp_earned + ${reward.xpTotal},
+      ${sql.raw(`${statType}_delta`)} = ${sql.raw(`${statType}_delta`)} + ${reward.statDelta},
+      level_at_end = ${levelResult.newLevel}
+  `);
 
   // 6. 추가 이미지 (batch 외 — 개수 가변)
   if (additionalImageUrls && additionalImageUrls.length > 0) {

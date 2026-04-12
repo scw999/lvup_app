@@ -62,7 +62,7 @@ export default async function QuestDetailPage({
   const isCompleted = quest.status === "completed";
 
   return (
-    <main className="flex flex-col gap-8">
+    <main className="flex flex-col gap-8 pb-8">
       {/* 뒤로 */}
       <Link
         href="/quests"
