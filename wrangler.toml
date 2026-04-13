@@ -10,7 +10,7 @@
 #      → 아래 [[r2_buckets]] 블록 주석 해제
 #   4) npx wrangler d1 migrations apply lvup-db --local   (Drizzle 마이그레이션 파일 준비 후)
 
-name = "lvup-app"
+name = "lvupapp"
 main = ".open-next/worker.js"
 compatibility_date = "2026-04-11"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
