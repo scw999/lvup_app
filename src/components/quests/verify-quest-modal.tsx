@@ -14,6 +14,7 @@ type RewardData = {
   newTitle: string | null;
   narrativeMessage: string;
   levelUpMessage: string | null;
+  isFirstVerification?: boolean;
 };
 
 export function VerifyQuestModal({

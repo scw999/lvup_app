@@ -36,6 +36,7 @@ type RewardData = {
   newTitle: string | null;
   narrativeMessage: string;
   levelUpMessage: string | null;
+  isFirstVerification?: boolean;
 };
 
 export function RewardOverlay({
@@ -147,6 +148,34 @@ export function RewardOverlay({
                 &ldquo;{reward.levelUpMessage}&rdquo;
               </p>
             )}
+          </div>
+        )}
+
+        {/* 화면 5a: 첫 인증 — 덕훌 1화 연결 */}
+        {reward.isFirstVerification && (
+          <div
+            className="w-full max-w-xs transition-all duration-700"
+            style={{
+              opacity: phase >= 5 ? 1 : 0,
+              transform: phase >= 5 ? "translateY(0)" : "translateY(12px)",
+            }}
+          >
+            <div className="rounded-xl border border-[--color-border-glow] bg-[--color-surface]/80 px-5 py-4 text-center">
+              <p className="text-sm leading-relaxed text-[--color-text-muted]">
+                덕훌도 같은 자리에서 시작했어요.
+              </p>
+              <a
+                href="https://lvup.world/story/deokul/1"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-[--color-accent] transition-colors hover:text-[--color-accent-hover]"
+              >
+                덕훌의 1화 읽기
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 3l4 4-4 4" />
+                </svg>
+              </a>
+            </div>
           </div>
         )}
 

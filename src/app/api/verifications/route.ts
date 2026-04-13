@@ -161,7 +161,15 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // 8. 스트릭 업데이트 (간단 처리: 어제와 비교)
+  // 8. 첫 인증 여부 확인 (화면 5a: 덕훌 1화 연결)
+  const verificationCount = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(verifications)
+    .where(eq(verifications.userId, user.id))
+    .get();
+  const isFirstVerification = (verificationCount?.count ?? 0) === 1;
+
+  // 9. 스트릭 업데이트 (간단 처리: 어제와 비교)
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = yesterday.toISOString().slice(0, 10);
@@ -181,6 +189,11 @@ export async function POST(request: NextRequest) {
       .where(eq(users.id, user.id));
   }
 
+  // 화면 5a: 첫 인증 시 특별 서사 메시지
+  const narrativeMessage = isFirstVerification
+    ? "너의 상태창이 열렸다. 이제 너의 이야기가 시작된다."
+    : reward.narrativeMessage;
+
   return NextResponse.json({
     success: true,
     reward: {
@@ -193,8 +206,9 @@ export async function POST(request: NextRequest) {
       leveledUp: levelResult.leveledUp,
       newLevel: levelResult.leveledUp ? levelResult.newLevel : null,
       newTitle: levelResult.leveledUp ? levelResult.newTitle : null,
-      narrativeMessage: reward.narrativeMessage,
+      narrativeMessage,
       levelUpMessage,
+      isFirstVerification,
     },
   });
 }
