@@ -17,7 +17,7 @@ type WizardProps = {
   nickname: string;
 };
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3 | 4 | 5;
 
 const MIN_REVEAL_MS = 3000;
 
@@ -28,6 +28,7 @@ export function OnboardingWizard({ nickname }: WizardProps) {
   const [roleTags, setRoleTags] = useState<string[]>([]);
   const [firstGoal, setFirstGoal] = useState<FirstGoal | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [firstQuestId, setFirstQuestId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   function toggleRoleTag(code: string) {
@@ -78,8 +79,11 @@ export function OnboardingWizard({ nickname }: WizardProps) {
           setStep(3);
           return;
         }
-        router.replace("/status");
-        router.refresh();
+        const data = (await res.json().catch(() => ({}))) as {
+          firstQuestId?: string;
+        };
+        setFirstQuestId(data.firstQuestId ?? null);
+        setStep(5);
       } catch {
         setFormError("세계와의 연결이 불안정하다. 다시 시도하라.");
         setStep(3);
@@ -106,6 +110,15 @@ export function OnboardingWizard({ nickname }: WizardProps) {
       )}
 
       {step === 4 && <StepReveal />}
+
+      {step === 5 && (
+        <StepHarp
+          nickname={nickname}
+          classCode={classCode}
+          firstQuestId={firstQuestId}
+          onEnter={() => router.replace(firstQuestId ? "/quests" : "/status")}
+        />
+      )}
     </div>
   );
 }
@@ -315,6 +328,90 @@ function StepReveal() {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+// ── Step 5 ────────────────────────────────────────────────────
+const HARP_MESSAGES: Record<ClassCode, string> = {
+  builder:
+    "드디어 나타났군. 나는 하프 — 이 세계에서 네 기록을 맡은 존재다.\n\n제작자의 상태창이 생성됐다. 네가 만들어낼 것들이 여기에 쌓일 것이다.\n\n첫 번째 퀘스트가 준비됐다. 시작하라.",
+  creator:
+    "왔군. 나는 하프 — 네 여정의 기록자다.\n\n창작자의 상태창이 살아났다. 네가 표현해낼 것들이 이 안에 새겨질 것이다.\n\n첫 번째 퀘스트가 기다리고 있다.",
+  leader:
+    "좋아. 나는 하프 — 이 세계의 관찰자다.\n\n주도자가 입장했다. 방향을 잡는 자의 상태창은 행동으로만 채워진다.\n\n첫 번째 퀘스트로 증명하라.",
+  explorer:
+    "흥미롭군. 나는 하프 — 네 탐구를 기록하는 존재다.\n\n탐구자의 상태창이 초기화됐다. 배울수록 이 창은 깊어질 것이다.\n\n첫 번째 퀘스트를 확인해봐라.",
+  supporter:
+    "반갑다. 나는 하프 — 이 세계에서 네 곁에 있을 기록자다.\n\n조율자의 상태창이 열렸다. 연결하고 도울수록 이 창은 빛날 것이다.\n\n첫 번째 퀘스트가 준비됐다.",
+};
+
+function StepHarp({
+  nickname,
+  classCode,
+  firstQuestId,
+  onEnter,
+}: {
+  nickname: string;
+  classCode: ClassCode | null;
+  firstQuestId: string | null;
+  onEnter: () => void;
+}) {
+  const info = classCode ? CLASS_INFO.find((c) => c.code === classCode) : null;
+  const message = classCode ? HARP_MESSAGES[classCode] : HARP_MESSAGES.builder;
+
+  return (
+    <div className="flex w-full max-w-lg flex-col items-start">
+      {/* HARP identity bar */}
+      <div className="mb-6 flex items-center gap-3">
+        <div
+          className="flex h-10 w-10 items-center justify-center rounded-full border text-sm font-bold"
+          style={info ? { borderColor: `${info.color}60`, color: info.color, backgroundColor: `${info.color}15` } : {}}
+        >
+          하
+        </div>
+        <div>
+          <p className="text-sm font-semibold">하프</p>
+          <p className="text-[10px] tracking-widest text-[--color-text-faint]">SYSTEM GUIDE · HARP</p>
+        </div>
+      </div>
+
+      {/* Message bubble */}
+      <div className="system-frame w-full p-5">
+        {message.split("\n\n").map((para, i) => (
+          <p key={i} className={`text-sm leading-relaxed ${i > 0 ? "mt-4" : ""} ${i === message.split("\n\n").length - 1 ? "text-[--color-text-muted]" : "text-[--color-text]"}`}>
+            {para}
+          </p>
+        ))}
+        <p className="mt-5 text-right text-xs text-[--color-text-faint]">— 하프</p>
+      </div>
+
+      {/* Class badge */}
+      {info && (
+        <div className="mt-4 flex items-center gap-2 text-xs">
+          <span
+            className="rounded-full border px-3 py-1 font-medium tracking-wider"
+            style={{ borderColor: `${info.color}50`, color: info.color }}
+          >
+            {info.label}
+          </span>
+          <span className="text-[--color-text-faint]">클래스로 등록됨</span>
+        </div>
+      )}
+
+      {/* CTA */}
+      <button
+        type="button"
+        onClick={onEnter}
+        className="mt-8 w-full rounded-xl py-4 text-base font-semibold text-white transition hover:opacity-90 active:scale-[0.98]"
+        style={info ? { backgroundColor: info.color } : { backgroundColor: "var(--color-accent)" }}
+      >
+        {firstQuestId ? "첫 퀘스트 시작하기" : "세계로 입장"}
+      </button>
+
+      <p className="mt-3 w-full text-center text-[11px] text-[--color-text-faint]">
+        {nickname}의 상태창이 생성됐다
+      </p>
     </div>
   );
 }

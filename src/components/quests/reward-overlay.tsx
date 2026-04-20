@@ -104,15 +104,18 @@ export function RewardOverlay({
         </div>
 
         {/* Narrative message */}
-        <p
-          className="max-w-xs text-sm leading-relaxed text-[--color-text-muted] transition-all duration-700"
+        <div
+          className="max-w-xs transition-all duration-700"
           style={{
             opacity: phase >= 2 ? 1 : 0,
             transform: phase >= 2 ? "translateY(0)" : "translateY(16px)",
           }}
         >
-          &ldquo;{reward.narrativeMessage}&rdquo;
-        </p>
+          <p className="text-sm leading-relaxed text-[--color-text-muted]">
+            &ldquo;{reward.narrativeMessage}&rdquo;
+          </p>
+          <p className="mt-1.5 text-right text-[10px] text-[--color-text-faint]">— 하프</p>
+        </div>
 
         {/* Stat increase */}
         <div

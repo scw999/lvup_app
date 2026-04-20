@@ -19,6 +19,7 @@ import { WeeklyReportTrigger } from "@/components/status/weekly-report-trigger";
 import { StreakBadges } from "@/components/status/streak-badges";
 import { ClassDiagnosisTrigger } from "@/components/status/class-diagnosis-modal";
 import { ShareTrigger } from "@/components/status/share-trigger";
+import { FirstVisitGuide } from "@/components/status/first-visit-guide";
 
 export const metadata: Metadata = { title: "상태창" };
 
@@ -99,6 +100,7 @@ export default async function StatusPage() {
 
   return (
     <main className="flex flex-col gap-5 pb-8">
+      <FirstVisitGuide fresh={totalStat === 0} />
       <ClassDiagnosisTrigger currentClass={user.classCode} />
       {/* ── 캐릭터 헤더 ── */}
       <section

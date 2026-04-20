@@ -5,6 +5,20 @@ import Link from "next/link";
 import type { Quest, MainStatType, QuestDifficulty } from "@/lib/db/schema";
 import { CreateQuestModal } from "./create-quest-modal";
 
+const HARP_DAILY_MESSAGES = [
+  "오늘의 퀘스트가 준비됐다. 하나만 선택해서 움직여라.",
+  "작은 행동 하나가 이 창을 바꾼다. 어느 것부터 할지는 네가 정해.",
+  "모든 퀘스트를 다 할 필요는 없다. 하나를 끝내는 게 전부다.",
+  "어제와 다른 오늘을 만드는 건 결국 목록 속 선택이다.",
+  "지금 기분에 맞는 퀘스트를 골라라. 완벽한 순서 같은 건 없다.",
+];
+
+function getHarpMessage(questCount: number): string {
+  if (questCount === 0) return "";
+  const hour = new Date().getHours();
+  return HARP_DAILY_MESSAGES[hour % HARP_DAILY_MESSAGES.length];
+}
+
 const STAT_COLOR: Record<MainStatType, string> = {
   vitality: "var(--color-vitality)", focus: "var(--color-focus)",
   execution: "var(--color-execution)", knowledge: "var(--color-knowledge)",
@@ -133,6 +147,16 @@ export function QuestListClient({ initialQuests, emptyMessages }: Props) {
             })}
           </ul>
         )
+      )}
+
+      {/* HARP 컨텍스트 — daily 탭, 퀘스트 있을 때만 */}
+      {tab === "daily" && filtered.length > 0 && (
+        <div className="flex items-start gap-2.5 rounded-lg border border-[--color-border] bg-[--color-surface]/50 px-4 py-3">
+          <span className="mt-0.5 shrink-0 text-[10px] font-semibold tracking-widest text-[--color-accent]">하프</span>
+          <p className="text-xs leading-relaxed text-[--color-text-faint]">
+            {getHarpMessage(filtered.length)}
+          </p>
+        </div>
       )}
 
       {/* 활성 퀘스트 리스트 */}
