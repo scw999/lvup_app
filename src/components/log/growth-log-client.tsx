@@ -25,7 +25,7 @@ type LogEntry = {
   summaryText: string | null;
 };
 
-export function GrowthLogClient() {
+export function GrowthLogClient({ emptyMessage }: { emptyMessage: string }) {
   const [heatmapDays, setHeatmapDays] = useState<HeatmapDay[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -118,8 +118,8 @@ export function GrowthLogClient() {
           RECENT
         </p>
         {logs.length === 0 ? (
-          <p className="py-8 text-center text-sm text-[--color-text-faint]">
-            아직 기록된 모험이 없다
+          <p className="px-4 py-10 text-center text-sm leading-relaxed text-[--color-text-muted]">
+            {emptyMessage}
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
@@ -129,15 +129,18 @@ export function GrowthLogClient() {
                   onClick={() => setSelectedDate(log.date)}
                   className="flex w-full items-center justify-between rounded-lg border border-[--color-border] bg-[--color-surface] px-4 py-3 text-left transition-colors hover:border-[--color-accent]/30"
                 >
-                  <div>
-                    <span className="text-xs text-[--color-text-muted]">
-                      {formatDate(log.date)}
-                    </span>
-                    <span className="ml-2 text-xs text-[--color-text-faint]">
-                      Lv.{log.levelAtEnd}
-                    </span>
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[--color-text-muted]">
+                        {formatDate(log.date)}
+                      </span>
+                      <span className="text-xs text-[--color-text-faint]">
+                        Lv.{log.levelAtEnd}
+                      </span>
+                    </div>
+                    <StatDots log={log} />
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 shrink-0">
                     <span className="text-xs text-[--color-text-faint]">
                       {log.questsCompleted}건
                     </span>
@@ -167,4 +170,37 @@ export function GrowthLogClient() {
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
   return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+const STAT_COLORS: Record<string, string> = {
+  vitalityDelta: "#f97316",
+  focusDelta: "#0891b2",
+  executionDelta: "#6366f1",
+  knowledgeDelta: "#a855f7",
+  relationshipDelta: "#84cc16",
+  influenceDelta: "#eab308",
+};
+const STAT_SHORT: Record<string, string> = {
+  vitalityDelta: "VIT", focusDelta: "FOC", executionDelta: "EXE",
+  knowledgeDelta: "KNO", relationshipDelta: "REL", influenceDelta: "INF",
+};
+
+function StatDots({ log }: { log: LogEntry }) {
+  const keys = ["vitalityDelta","focusDelta","executionDelta","knowledgeDelta","relationshipDelta","influenceDelta"] as const;
+  const active = keys.filter((k) => (log[k as keyof LogEntry] as number) > 0);
+  if (active.length === 0) return null;
+  return (
+    <div className="flex items-center gap-1">
+      {active.map((k) => (
+        <span
+          key={k}
+          className="rounded px-1 py-0.5 font-mono text-[9px] font-bold"
+          style={{ backgroundColor: `${STAT_COLORS[k]}20`, color: STAT_COLORS[k] }}
+          title={`${STAT_SHORT[k]} +${log[k as keyof LogEntry]}`}
+        >
+          {STAT_SHORT[k]}
+        </span>
+      ))}
+    </div>
+  );
 }

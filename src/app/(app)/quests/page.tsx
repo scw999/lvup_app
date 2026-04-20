@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { requireOnboardedUser } from "@/lib/auth";
 import { getDb } from "@/lib/db/client";
 import { quests } from "@/lib/db/schema";
+import { getEmptyStateMessage } from "@/lib/messages/empty-states";
 import { QuestListClient } from "@/components/quests/quest-list-client";
 
 export const metadata: Metadata = {
@@ -21,5 +22,11 @@ export default async function QuestsPage() {
     .where(and(eq(quests.userId, user.id), eq(quests.status, "active")))
     .orderBy(quests.createdAt);
 
-  return <QuestListClient initialQuests={activeQuests} />;
+  // 빈 상태 메시지는 서버에서 한 번 뽑아 내려준다 — 탭 토글로 재추첨되지 않게 고정.
+  const emptyMessages = {
+    daily: getEmptyStateMessage("no_quests_daily"),
+    custom: getEmptyStateMessage("no_quests_custom"),
+  };
+
+  return <QuestListClient initialQuests={activeQuests} emptyMessages={emptyMessages} />;
 }

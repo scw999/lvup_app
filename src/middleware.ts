@@ -16,6 +16,8 @@ const PROTECTED_PREFIXES = [
   "/log",
   "/settings",
   "/onboarding",
+  "/feed",
+  "/profile",
 ];
 
 const AUTH_PAGES = new Set(["/login", "/signup"]);

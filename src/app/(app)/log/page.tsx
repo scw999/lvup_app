@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { requireOnboardedUser } from "@/lib/auth";
+import { getEmptyStateMessage } from "@/lib/messages/empty-states";
 import { GrowthLogClient } from "@/components/log/growth-log-client";
 
 export const metadata: Metadata = {
@@ -9,5 +10,6 @@ export const metadata: Metadata = {
 // /log — PRD 16.2 화면 6
 export default async function LogPage() {
   await requireOnboardedUser();
-  return <GrowthLogClient />;
+  const emptyMessage = getEmptyStateMessage("no_growth_log");
+  return <GrowthLogClient emptyMessage={emptyMessage} />;
 }

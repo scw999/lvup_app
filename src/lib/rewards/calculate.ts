@@ -10,6 +10,8 @@ export type RewardInput = {
   additionalImageCount: number;
   hasLink: boolean;
   streakDays: number;
+  isFirstVerification?: boolean;
+  isComeback?: boolean;
 };
 
 export type RewardResult = {
@@ -58,6 +60,10 @@ export function calculateQuestReward(input: RewardInput): RewardResult {
     xpTotal,
     statType,
     statDelta,
-    narrativeMessage: getNarrativeMessage(statType),
+    narrativeMessage: getNarrativeMessage(statType, {
+      streakDays: input.streakDays,
+      isFirstVerification: input.isFirstVerification,
+      isComeback: input.isComeback,
+    }),
   };
 }

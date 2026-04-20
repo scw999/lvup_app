@@ -37,6 +37,8 @@ type RewardData = {
   narrativeMessage: string;
   levelUpMessage: string | null;
   isFirstVerification?: boolean;
+  newQuestUnlocked?: string | null;
+  streakMilestone?: number | null;
 };
 
 export function RewardOverlay({
@@ -176,6 +178,47 @@ export function RewardOverlay({
                 </svg>
               </a>
             </div>
+          </div>
+        )}
+
+        {/* 스트릭 milestone */}
+        {reward.streakMilestone && (
+          <div
+            className="w-full max-w-xs rounded-xl border border-orange-500/30 bg-orange-500/10 px-5 py-4 text-center transition-all duration-700"
+            style={{
+              opacity: phase >= 5 ? 1 : 0,
+              transform: phase >= 5 ? "translateY(0)" : "translateY(12px)",
+            }}
+          >
+            <p className="text-2xl">🔥</p>
+            <p className="mt-1 font-mono text-lg font-bold text-orange-400">
+              {reward.streakMilestone}일 연속 달성!
+            </p>
+            <p className="mt-1 text-xs text-[--color-text-faint]">
+              {reward.streakMilestone >= 100
+                ? "전설의 영역에 들어섰다"
+                : reward.streakMilestone >= 30
+                ? "한 달을 흔들리지 않았다"
+                : reward.streakMilestone >= 14
+                ? "루틴이 몸에 새겨지고 있다"
+                : reward.streakMilestone >= 7
+                ? "한 주를 끊기지 않았다"
+                : "불꽃이 타오르기 시작했다"}
+            </p>
+          </div>
+        )}
+
+        {/* 새 퀘스트 해금 알림 */}
+        {reward.newQuestUnlocked && (
+          <div
+            className="w-full max-w-xs rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-4 py-2.5 text-center transition-all duration-500"
+            style={{
+              opacity: phase >= 5 ? 1 : 0,
+              transform: phase >= 5 ? "translateY(0)" : "translateY(8px)",
+            }}
+          >
+            <p className="text-[10px] tracking-wider text-emerald-400">NEW QUEST UNLOCKED</p>
+            <p className="mt-0.5 text-xs text-[--color-text-muted]">{reward.newQuestUnlocked}</p>
           </div>
         )}
 

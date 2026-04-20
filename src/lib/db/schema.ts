@@ -165,6 +165,7 @@ export const verifications = sqliteTable("verifications", {
   xpBonusEarned: integer("xp_bonus_earned").notNull().default(0), // 기여 XP (Phase 2 예약, MVP=0)
   xpTotalEarned: integer("xp_total_earned").notNull().default(0), // 저장된 합계
   narrativeMessage: text("narrative_message"), // 보상 시점에 생성되어 로그로 남음
+  isPublic: integer("is_public").notNull().default(1), // 1=공개(피드 노출), 0=비공개
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),
@@ -235,6 +236,32 @@ export const levelEvents = sqliteTable("level_events", {
     .default(sql`(datetime('now'))`),
 });
 
+// ── verdicts ─────────────────────────────────────────────
+// Phase 2 — 경량 인정 시스템 (PRD Part 13)
+// 다른 사용자의 인증에 "박수"를 보내는 1인 1회 토글.
+// (verification_id, user_id) 복합 unique → 중복 방지.
+export const verdicts = sqliteTable(
+  "verdicts",
+  {
+    id: text("id").primaryKey(), // vrd_xxx
+    verificationId: text("verification_id")
+      .notNull()
+      .references(() => verifications.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`(datetime('now'))`),
+  },
+  (table) => ({
+    uniqueVerdict: uniqueIndex("verdicts_verification_user_unique").on(
+      table.verificationId,
+      table.userId,
+    ),
+  }),
+);
+
 // ── badges ────────────────────────────────────────────────
 // TECH_SPEC 5.9 — 뱃지 정의
 export const badges = sqliteTable("badges", {
@@ -278,3 +305,5 @@ export type GrowthLog = typeof growthLog.$inferSelect;
 export type LevelEvent = typeof levelEvents.$inferSelect;
 export type Badge = typeof badges.$inferSelect;
 export type UserBadge = typeof userBadges.$inferSelect;
+export type Verdict = typeof verdicts.$inferSelect;
+export type NewVerdict = typeof verdicts.$inferInsert;

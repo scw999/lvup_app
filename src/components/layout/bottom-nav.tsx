@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 // LV UP — 하단 네비게이션 (PRD 16.1)
-// 탭 3개: 상태창 / 퀘스트 / 로그
-// Phase 2 추가 예정: 길드, 인벤토리
+// Phase 2: 피드 탭 추가
 
 const NAV_ITEMS = [
   { href: "/status", label: "상태창", icon: StatusIcon },
   { href: "/quests", label: "퀘스트", icon: QuestIcon },
+  { href: "/feed", label: "피드", icon: FeedIcon },
   { href: "/log", label: "로그", icon: LogIcon },
 ] as const;
 
@@ -77,6 +77,24 @@ function QuestIcon({ active }: { active: boolean }) {
       strokeLinejoin="round"
     >
       <path d="M4 5h12M4 10h8M4 15h10" />
+    </svg>
+  );
+}
+
+function FeedIcon({ active }: { active: boolean }) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={active ? "2" : "1.5"}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="10" cy="10" r="7" />
+      <path d="M10 6v4l2.5 2.5" />
     </svg>
   );
 }

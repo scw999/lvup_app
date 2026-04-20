@@ -29,14 +29,16 @@ export default async function AppLayout({
             <span className="text-[11px] text-[--color-text-faint]">
               {user.nickname}
             </span>
-            <form action="/api/auth/logout" method="post">
-              <button
-                type="submit"
-                className="text-[10px] text-[--color-text-faint] hover:text-[--color-text-muted]"
-              >
-                logout
-              </button>
-            </form>
+            <Link
+              href="/settings"
+              className="text-[--color-text-faint] hover:text-[--color-text-muted]"
+              aria-label="설정"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="8" cy="8" r="2.5" />
+                <path d="M8 1.5v1M8 13.5v1M1.5 8h1M13.5 8h1M3.2 3.2l.7.7M12.1 12.1l.7.7M12.8 3.2l-.7.7M3.9 12.1l-.7.7" />
+              </svg>
+            </Link>
           </div>
         </div>
       </header>

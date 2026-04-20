@@ -47,3 +47,7 @@ export function newBadgeId(): string {
 export function newUserBadgeId(): string {
   return `ubd_${randomId()}`;
 }
+
+export function newVerdictId(): string {
+  return `vrd_${randomId()}`;
+}

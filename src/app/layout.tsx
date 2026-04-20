@@ -37,6 +37,13 @@ export const metadata: Metadata = {
     siteName: "LV UP",
     locale: "ko_KR",
     type: "website",
+    images: [{ url: "https://lvup.world/api/og", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LV UP — 현실을 게임처럼",
+    description: "현실에서 행동한 모든 것이, 당신의 상태창이 된다.",
+    images: ["https://lvup.world/api/og"],
   },
 };
 

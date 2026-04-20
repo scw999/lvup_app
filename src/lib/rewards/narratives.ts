@@ -1,17 +1,32 @@
-import type { MainStatType } from "@/lib/db/schema";
+import type { MainStatType, ClassCode } from "@/lib/db/schema";
 
-// LV UP — 서사 메시지 풀 (TECH_SPEC 10.2)
+// LV UP — 서사 메시지 풀 (PRD Part 11)
 //
-// Phase 1: 하드코딩. Phase 2: DB 테이블로 옮겨 어드민에서 관리.
-// 작성 원칙: 짧게(1~2문장), 평가가 아닌 인정, 구체적 행동에 의미 부여.
+// 톤 원칙(PRD 11.7 HARP 톤): 관찰자 / 자기 비교 / 동행 / 수용 / 질문.
+// 칭찬 자판기 톤("잘했어요!"), 단정 톤("당신은 이런 사람"), 코치 톤("이렇게 하면 됨") 금지.
+// Phase 1: 하드코딩. Phase 2에서 harp_messages 테이블로 이전 예정.
 
-const NARRATIVE_POOL: Record<MainStatType, string[]> = {
+export type NarrativeContext = {
+  streakDays?: number;
+  isFirstVerification?: boolean;
+  isComeback?: boolean;
+};
+
+// ── 보상 메시지 — PRD 11.2 ────────────────────────────────────
+const REWARD_MESSAGES: Record<MainStatType, readonly string[]> = {
   vitality: [
     "오늘 너는 몸을 깨웠다. 내일의 너에게 선물이 되었다.",
     "체력은 모든 능력의 그릇이다. 그릇이 한 뼘 자랐다.",
     "한 발 더 뛴 자만이 다음 산을 본다.",
     "몸을 움직인 자에게 마음도 움직인다.",
     "오늘의 땀은 내일의 자유다.",
+    "어제의 너는 이걸 미뤘다. 오늘의 너는 미루지 않았다.",
+    "몸이 한 일은 머리가 잊어도 몸이 기억한다.",
+    "오늘 너는 너의 그릇을 닦았다.",
+    "쉬는 것도 체력이다. 다만 오늘 너는 움직였다.",
+    "심장 한 박자가 하루를 바꾼다.",
+    "발목까지 차오르던 피로 위에서 너는 한 발을 움직였다.",
+    "몸의 기록은 거짓말을 하지 않는다.",
   ],
   focus: [
     "산만한 세상에서 한 점에 머무는 것은 가장 어려운 기술이다.",
@@ -19,6 +34,13 @@ const NARRATIVE_POOL: Record<MainStatType, string[]> = {
     "20분의 몰입이 한 시간의 산만함을 이긴다.",
     "주의를 모으는 자가 결국 가장 멀리 본다.",
     "집중은 의지가 아니라 훈련이다. 너는 훈련했다.",
+    "한 가지에 머물렀다. 그 자체가 오늘의 공부였다.",
+    "방해는 항상 있었다. 너는 거기서 한 걸음 비켜섰다.",
+    "오늘 너의 화면은 한 곳을 향했다.",
+    "잠깐 흩어졌다. 너는 다시 모았다. 그게 진짜 집중이다.",
+    "흩어지는 마음을 한 줄로 모아두는 시간이었다.",
+    "오늘 네가 머문 한 점에서 다음 길이 시작된다.",
+    "한 시간이 짧아 보였다면, 너는 거기 있었던 거다.",
   ],
   execution: [
     "오늘 너는 한계를 한 발짝 넘었다. 실행력이 강화되었다.",
@@ -26,6 +48,13 @@ const NARRATIVE_POOL: Record<MainStatType, string[]> = {
     "완벽한 시작은 없다. 시작한 자만이 도착한다.",
     "미루지 않은 하루는 미래를 바꾼다.",
     "오늘의 작은 실행이 내일의 큰 결과가 된다.",
+    "어제 미뤘던 것을 오늘 손에 쥐었다.",
+    "마음 속 100가지 계획 중 하나가 세상에 나왔다.",
+    "오늘 너는 '다음에'라고 말하지 않았다.",
+    "완벽하지 않아도 좋다. 너는 일단 했다.",
+    "끝까지 갈 필요 없었다. 시작했다는 게 오늘의 사건이다.",
+    "행동 하나가 머릿속의 100가지 의심을 잠재웠다.",
+    "오늘 너는 '하고 싶다'에서 '했다'로 한 단어를 옮겼다.",
   ],
   knowledge: [
     "새로운 지식이 시야를 넓혔다. 아직 읽지 않은 책장이 빛나고 있다.",
@@ -33,6 +62,13 @@ const NARRATIVE_POOL: Record<MainStatType, string[]> = {
     "배우는 자는 어제의 자신을 매일 추월한다.",
     "한 줄의 통찰이 백 줄의 지식보다 무겁다.",
     "지식은 쌓이는 것이 아니라 연결되는 것이다.",
+    "오늘 모르던 것 하나가 줄었다. 그게 시작이다.",
+    "읽은 줄이 너의 다음 한 마디를 만든다.",
+    "이해되지 않아도 좋다. 너의 머리가 그걸 안고 잠들 것이다.",
+    "한 페이지가 다음 페이지를 부른다.",
+    "어제의 너는 이 단어를 몰랐다.",
+    "배움의 깊이는 시간이 아니라 질문의 무게로 정해진다.",
+    "오늘 새로 만난 한 줄이 언젠가 너를 살릴지 모른다.",
   ],
   relationship: [
     "새로운 연결이 생겼다. 세계는 혼자 넓히는 것이 아니다.",
@@ -40,6 +76,13 @@ const NARRATIVE_POOL: Record<MainStatType, string[]> = {
     "혼자 가면 빠르고, 함께 가면 멀리 간다. 너는 멀리 가는 길을 택했다.",
     "관계는 시간이 아니라 진심으로 깊어진다.",
     "타인을 돕는 자가 결국 자신을 돕는다.",
+    "한 사람의 이름을 더 부르게 되었다.",
+    "오늘 네가 건넨 인사가 누군가의 외로움을 덜었을지 모른다.",
+    "들어주는 일도 행동이다. 너는 들었다.",
+    "관계는 큰 사건이 아니라 작은 안부로 자란다.",
+    "혼자 잘하는 것보다 어려운 일을 오늘 너는 했다.",
+    "옆에 있는 사람을 본다는 것도 능력이다.",
+    "오늘 너는 누군가의 하루에 한 줄을 적었다.",
   ],
   influence: [
     "네 목소리가 한 사람에게 닿았다. 영향력은 거기서 시작된다.",
@@ -47,20 +90,101 @@ const NARRATIVE_POOL: Record<MainStatType, string[]> = {
     "전한다는 것은 가장 큰 학습이다. 너는 두 번 배웠다.",
     "남긴 것은 잊혀지지 않는다.",
     "가장 큰 보상은 다른 사람의 변화에서 온다.",
+    "한 사람이라도 너의 이야기에 멈춰섰다면 충분하다.",
+    "네가 쓴 한 줄이 어디까지 갈지 너는 모른다.",
+    "전하는 일은 결국 자기 자신에게도 전하는 일이다.",
+    "조용한 영향이 가장 오래 간다.",
+    "오늘 너는 너의 흔적을 한 칸 더 남겼다.",
+    "말하지 않으면 닿지 않는다. 너는 말했다.",
+    "쓰는 자만이 자기 생각의 모양을 본다. 너는 봤다.",
   ],
 };
 
-export function getNarrativeMessage(statType: MainStatType): string {
-  const pool = NARRATIVE_POOL[statType];
+// ── 첫 인증 — "상태창이 열린다" 모먼트 ────────────────────
+const FIRST_VERIFICATION_MESSAGES: readonly string[] = [
+  "너의 상태창이 열렸다. 이제 너의 이야기가 시작된다.",
+  "첫 발자국이 찍혔다. 발자국은 사라지지 않는다.",
+  "오늘 너는 관찰자에서 플레이어가 되었다.",
+];
+
+// ── 컴백(7일+ 침묵 후 복귀) ───────────────────────────────
+const COMEBACK_MESSAGES: readonly string[] = [
+  "기다리고 있었어. 천천히 와도 돼.",
+  "비어 있던 시간도 너의 일부였다. 다시 시작하면 된다.",
+  "잠깐 떠나 있었던 자만이 돌아오는 기쁨을 안다.",
+  "어디에 있었든, 지금 여기에 너는 있다. 그걸로 충분해.",
+];
+
+// ── 스트릭 마일스톤 — 7/30/100일 직후 ───────────────────
+const STREAK_MILESTONE_MESSAGES: Record<number, readonly string[]> = {
+  7: [
+    "7일을 이은 자만이 자기 패턴을 본다.",
+    "한 주를 끊지 않고 걸었다. 흔들림 없는 자의 첫 표시다.",
+  ],
+  30: [
+    "30일은 우연이 아니다. 너는 너의 습관이 되었다.",
+    "한 달을 같은 방향으로. 그 자체가 이미 도착이다.",
+  ],
+  100: [
+    "100일을 견딘 자에게 다른 풍경이 열린다.",
+    "이건 더 이상 도전이 아니다. 너의 일부가 되었다.",
+  ],
+};
+
+function pick<T>(pool: readonly T[]): T {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-const LEVELUP_MESSAGES = [
+// PRD 11.8 우선순위: 첫인증 > 컴백 > 스트릭 마일스톤 > 일반 보상
+export function getNarrativeMessage(
+  statType: MainStatType,
+  ctx?: NarrativeContext,
+): string {
+  if (ctx?.isFirstVerification) return pick(FIRST_VERIFICATION_MESSAGES);
+  if (ctx?.isComeback) return pick(COMEBACK_MESSAGES);
+  const streak = ctx?.streakDays ?? 0;
+  const milestone = STREAK_MILESTONE_MESSAGES[streak];
+  if (milestone) return pick(milestone);
+  return pick(REWARD_MESSAGES[statType]);
+}
+
+// ── 레벨업 메시지 — PRD 11.3 ──────────────────────────────
+const LEVELUP_GENERIC: readonly string[] = [
   "당신은 더 이상 어제의 당신이 아니다.",
   "한 단계의 벽을 넘은 자에게 새로운 풍경이 열린다.",
   "성장은 우연이 아니라 누적이다. 너는 누적했다.",
+  "한 칸을 더 올라섰다. 시야가 한 뼘 넓어졌다.",
+  "이 레벨에서 너는 새로운 것을 보게 될 것이다.",
 ];
 
-export function getLevelUpMessage(): string {
-  return LEVELUP_MESSAGES[Math.floor(Math.random() * LEVELUP_MESSAGES.length)];
+// 클래스별 레벨업 플레이버 — PRD 11.4 키워드 기반
+const LEVELUP_BY_CLASS: Record<ClassCode, readonly string[]> = {
+  builder: [
+    "손에 익은 도구가 또 하나 늘었다.",
+    "너의 청사진이 한 줄 더 자랐다.",
+  ],
+  creator: [
+    "네 안의 빛이 한 톤 더 짙어졌다.",
+    "표현하지 못한 것이 표현 가능해지는 순간이 왔다.",
+  ],
+  leader: [
+    "깃발을 한 칸 더 높이 들 자격을 얻었다.",
+    "방향을 보는 눈이 한 단계 깊어졌다.",
+  ],
+  explorer: [
+    "지도의 빈 칸이 한 칸 채워졌다.",
+    "너의 망원경이 한 단계 더 멀리 본다.",
+  ],
+  supporter: [
+    "너의 손이 한 사람에게 더 닿게 되었다.",
+    "다리를 한 줄 더 놓는 법을 배웠다.",
+  ],
+};
+
+export function getLevelUpMessage(classCode?: ClassCode | null): string {
+  // 50% 확률로 클래스 톤, 나머지는 공통 톤 — 같은 메시지 반복 방지
+  if (classCode && Math.random() < 0.5) {
+    return pick(LEVELUP_BY_CLASS[classCode]);
+  }
+  return pick(LEVELUP_GENERIC);
 }

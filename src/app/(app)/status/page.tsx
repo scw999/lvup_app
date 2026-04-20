@@ -8,8 +8,17 @@ import type { MainStatType } from "@/lib/db/schema";
 import { CLASS_INFO_BY_CODE } from "@/lib/onboarding/classes";
 import type { ClassCode } from "@/lib/db/schema";
 import { getStatDescriptor, STAT_LABELS } from "@/lib/stats/descriptors";
+import {
+  getEmptyStateMessage,
+  getSilenceEmptyState,
+  getTimeBasedEmptyState,
+} from "@/lib/messages/empty-states";
 import { StatRadar } from "@/components/status/stat-radar";
 import { ClassEmblem } from "@/components/status/class-emblem";
+import { WeeklyReportTrigger } from "@/components/status/weekly-report-trigger";
+import { StreakBadges } from "@/components/status/streak-badges";
+import { ClassDiagnosisTrigger } from "@/components/status/class-diagnosis-modal";
+import { ShareTrigger } from "@/components/status/share-trigger";
 
 export const metadata: Metadata = { title: "상태창" };
 
@@ -81,8 +90,16 @@ export default async function StatusPage() {
     ? STAT_ORDER.reduce((sum, key) => sum + (stats[key] as number), 0)
     : 0;
 
+  // 빈 상태 메시지 — PRD 17.4: 침묵 컨텍스트(우선) → 시간대 → 기본
+  const silenceCtx = getSilenceEmptyState(user.lastActiveDate);
+  const timeCtx = getTimeBasedEmptyState();
+  const emptyQuestMessage = getEmptyStateMessage(
+    silenceCtx ?? timeCtx ?? "no_main_quest",
+  );
+
   return (
     <main className="flex flex-col gap-5 pb-8">
+      <ClassDiagnosisTrigger currentClass={user.classCode} />
       {/* ── 캐릭터 헤더 ── */}
       <section
         className="system-frame relative overflow-hidden p-6"
@@ -92,12 +109,28 @@ export default async function StatusPage() {
       >
         <div className="mb-4 flex items-center justify-between">
           <span className="system-text">STATUS WINDOW</span>
-          <span
-            className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-[0.15em]"
-            style={{ borderColor: `${classInfo.color}60`, color: classInfo.color }}
-          >
-            {classInfo.label}
-          </span>
+          <div className="flex items-center gap-2">
+            <ShareTrigger
+              nickname={user.nickname}
+              classCode={user.classCode}
+              level={user.level}
+              title={user.title}
+              xp={user.xp}
+              xpToNext={user.xpToNext}
+              streakDays={user.streakDays}
+              stats={stats ? {
+                vitality: stats.vitality, focus: stats.focus,
+                execution: stats.execution, knowledge: stats.knowledge,
+                relationship: stats.relationship, influence: stats.influence,
+              } : null}
+            />
+            <span
+              className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-[0.15em]"
+              style={{ borderColor: `${classInfo.color}60`, color: classInfo.color }}
+            >
+              {classInfo.label}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
@@ -204,7 +237,7 @@ export default async function StatusPage() {
                     />
                   </div>
                   <p className="mt-2 text-[11px] text-[--color-text-faint]">
-                    {getStatDescriptor(val)}
+                    {getStatDescriptor(val, d)}
                   </p>
                 </div>
               );
@@ -245,8 +278,8 @@ export default async function StatusPage() {
         </Link>
       ) : (
         <section className="system-frame p-6 text-center">
-          <p className="text-sm text-[--color-text-faint]">
-            — 오늘의 모험은 아직 시작되지 않았다 —
+          <p className="text-sm leading-relaxed text-[--color-text-muted]">
+            {emptyQuestMessage}
           </p>
           <Link
             href="/quests"
@@ -256,6 +289,12 @@ export default async function StatusPage() {
           </Link>
         </section>
       )}
+
+      {/* ── 스트릭 배지 ── */}
+      <StreakBadges streakDays={user.streakDays} />
+
+      {/* ── 7일 진단 리포트 ── */}
+      <WeeklyReportTrigger />
 
       {/* ── 하단 시스템 메시지 ── */}
       <div className="text-center">

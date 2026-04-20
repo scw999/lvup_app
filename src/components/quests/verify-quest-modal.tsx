@@ -15,6 +15,7 @@ type RewardData = {
   narrativeMessage: string;
   levelUpMessage: string | null;
   isFirstVerification?: boolean;
+  newQuestUnlocked?: string | null;
 };
 
 export function VerifyQuestModal({
@@ -30,6 +31,7 @@ export function VerifyQuestModal({
 }) {
   const [note, setNote] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
+  const [isPublic, setIsPublic] = useState(true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -101,6 +103,7 @@ export function VerifyQuestModal({
           note: note.trim() || undefined,
           representativeImageUrl,
           linkUrl: linkUrl.trim() || undefined,
+          isPublic,
         }),
       });
 
@@ -221,6 +224,26 @@ export function VerifyQuestModal({
             className="w-full rounded-lg border border-[--color-border] bg-[--color-surface-alt] px-3 py-2 text-sm text-[--color-text] outline-none focus:border-[--color-accent]"
             placeholder="https://..."
           />
+        </label>
+
+        {/* 공개 설정 */}
+        <label className="mb-5 flex cursor-pointer items-center justify-between">
+          <span className="text-xs text-[--color-text-muted]">활동 피드에 공개</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isPublic}
+            onClick={() => setIsPublic((v) => !v)}
+            className={`relative h-5 w-9 rounded-full transition-colors ${
+              isPublic ? "bg-[--color-accent]" : "bg-[--color-border]"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                isPublic ? "translate-x-4" : "translate-x-0.5"
+              }`}
+            />
+          </button>
         </label>
 
         {error && <p className="mb-3 text-xs text-red-400">{error}</p>}

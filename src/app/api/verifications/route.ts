@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, count } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db/client";
 import {
@@ -10,11 +10,13 @@ import {
   users,
   levelEvents,
 } from "@/lib/db/schema";
-import type { MainStatType } from "@/lib/db/schema";
+import type { ClassCode, MainStatType } from "@/lib/db/schema";
 import { calculateQuestReward } from "@/lib/rewards/calculate";
 import { checkLevelUp } from "@/lib/rewards/levels";
 import { getLevelUpMessage } from "@/lib/rewards/narratives";
-import { newVerificationId, newQuestMediaId, newGrowthLogId, newLevelEventId } from "@/lib/utils/id";
+import { newVerificationId, newQuestMediaId, newGrowthLogId, newLevelEventId, newQuestId } from "@/lib/utils/id";
+import { pickReplenishmentQuest } from "@/lib/quests/replenishment";
+import { DIFFICULTY_REWARDS } from "@/lib/quests/rewards";
 
 // POST /api/verifications — TECH_SPEC 8.6
 // 단일 트랜잭션: verification → quest 완료 → 보상 → stats → xp/level → growth_log → level_events
@@ -30,6 +32,7 @@ export async function POST(request: NextRequest) {
     representativeImageUrl?: string;
     additionalImageUrls?: string[];
     linkUrl?: string;
+    isPublic?: boolean;
   };
   try {
     body = await request.json();
@@ -37,7 +40,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "INVALID_JSON" }, { status: 400 });
   }
 
-  const { questId, note, representativeImageUrl, additionalImageUrls, linkUrl } = body;
+  const { questId, note, representativeImageUrl, additionalImageUrls, linkUrl, isPublic = true } = body;
 
   if (!questId) {
     return NextResponse.json({ error: "QUEST_ID_REQUIRED" }, { status: 400 });
@@ -59,6 +62,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "ALREADY_COMPLETED" }, { status: 409 });
   }
 
+  // ── 컨텍스트 추론 (보상 메시지에 사용) ─────────────────
+  // 첫 인증 여부 — 인증 row 삽입 전 기준
+  const verificationCountRow = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(verifications)
+    .where(eq(verifications.userId, user.id))
+    .get();
+  const isFirstVerification = (verificationCountRow?.count ?? 0) === 0;
+
+  // 컴백 — 마지막 활동일이 7일 이상 전이고 첫 인증은 아님
+  const today = new Date().toISOString().slice(0, 10);
+  let isComeback = false;
+  if (!isFirstVerification && user.lastActiveDate) {
+    const lastMs = new Date(user.lastActiveDate + "T00:00:00Z").getTime();
+    const todayMs = new Date(today + "T00:00:00Z").getTime();
+    const daysSince = Math.floor((todayMs - lastMs) / 86_400_000);
+    isComeback = daysSince >= 7;
+  }
+
   // 보상 계산
   const reward = calculateQuestReward({
     quest,
@@ -67,13 +89,15 @@ export async function POST(request: NextRequest) {
     additionalImageCount: additionalImageUrls?.length ?? 0,
     hasLink: !!linkUrl,
     streakDays: user.streakDays,
+    isFirstVerification,
+    isComeback,
   });
 
-  // 레벨업 판정
-  const levelResult = checkLevelUp(user.xp, reward.xpTotal, user.level);
+  // 레벨업 판정 — 클래스에 맞는 칭호로 계산
+  const classCode = user.classCode as ClassCode;
+  const levelResult = checkLevelUp(user.xp, reward.xpTotal, user.level, classCode);
 
   const now = new Date().toISOString();
-  const today = now.slice(0, 10);
   const verificationId = newVerificationId();
   const textOnly = !representativeImageUrl ? 1 : 0;
   const statType = reward.statType as MainStatType;
@@ -94,6 +118,7 @@ export async function POST(request: NextRequest) {
     xpBonusEarned: reward.xpBonus,
     xpTotalEarned: reward.xpTotal,
     narrativeMessage: reward.narrativeMessage,
+    isPublic: isPublic ? 1 : 0,
   });
 
   // 2. quest 완료 처리
@@ -150,7 +175,7 @@ export async function POST(request: NextRequest) {
   // 7. 레벨업 이벤트
   let levelUpMessage: string | null = null;
   if (levelResult.leveledUp) {
-    levelUpMessage = getLevelUpMessage();
+    levelUpMessage = getLevelUpMessage(classCode);
     await db.insert(levelEvents).values({
       id: newLevelEventId(),
       userId: user.id,
@@ -161,22 +186,14 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // 8. 첫 인증 여부 확인 (화면 5a: 덕훌 1화 연결)
-  const verificationCount = await db
-    .select({ count: sql<number>`COUNT(*)` })
-    .from(verifications)
-    .where(eq(verifications.userId, user.id))
-    .get();
-  const isFirstVerification = (verificationCount?.count ?? 0) === 1;
-
-  // 9. 스트릭 업데이트 (간단 처리: 어제와 비교)
+  // 8. 스트릭 업데이트
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = yesterday.toISOString().slice(0, 10);
 
   let newStreak = 1;
   if (user.lastActiveDate === today) {
-    newStreak = user.streakDays; // 이미 오늘 활동함
+    newStreak = user.streakDays;
   } else if (user.lastActiveDate === yesterdayStr) {
     newStreak = user.streakDays + 1;
   }
@@ -189,10 +206,47 @@ export async function POST(request: NextRequest) {
       .where(eq(users.id, user.id));
   }
 
-  // 화면 5a: 첫 인증 시 특별 서사 메시지
-  const narrativeMessage = isFirstVerification
-    ? "너의 상태창이 열렸다. 이제 너의 이야기가 시작된다."
-    : reward.narrativeMessage;
+  // 스트릭 milestone 감지 (새로 달성한 경우에만)
+  const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
+  const streakMilestone =
+    newStreak !== user.streakDays && STREAK_MILESTONES.includes(newStreak)
+      ? newStreak
+      : null;
+
+  // 9. 퀘스트 자동 보충 — active daily 퀘스트 < 2개이면 1개 생성
+  let replenishedQuestTitle: string | null = null;
+  try {
+    const activeCount = await db
+      .select({ count: count() })
+      .from(quests)
+      .where(
+        and(
+          eq(quests.userId, user.id),
+          eq(quests.status, "active"),
+          eq(quests.type, "daily"),
+        ),
+      )
+      .get();
+
+    if ((activeCount?.count ?? 0) < 2) {
+      const template = pickReplenishmentQuest(classCode);
+      const rewards = DIFFICULTY_REWARDS[template.difficulty];
+      await db.insert(quests).values({
+        id: newQuestId(),
+        userId: user.id,
+        title: template.title,
+        type: "daily",
+        difficulty: template.difficulty,
+        mainStatType: template.mainStatType,
+        xpRewardBase: rewards.xpRewardBase,
+        statReward: rewards.statReward,
+        estimatedMinutes: template.estimatedMinutes,
+      });
+      replenishedQuestTitle = template.title;
+    }
+  } catch {
+    // 보충 실패는 보상 응답에 영향 없이 무시
+  }
 
   return NextResponse.json({
     success: true,
@@ -206,9 +260,11 @@ export async function POST(request: NextRequest) {
       leveledUp: levelResult.leveledUp,
       newLevel: levelResult.leveledUp ? levelResult.newLevel : null,
       newTitle: levelResult.leveledUp ? levelResult.newTitle : null,
-      narrativeMessage,
+      narrativeMessage: reward.narrativeMessage,
       levelUpMessage,
       isFirstVerification,
+      newQuestUnlocked: replenishedQuestTitle,
+      streakMilestone,
     },
   });
 }

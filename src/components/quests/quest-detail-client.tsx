@@ -17,6 +17,7 @@ type RewardData = {
   narrativeMessage: string;
   levelUpMessage: string | null;
   isFirstVerification?: boolean;
+  newQuestUnlocked?: string | null;
 };
 
 export function QuestVerifyButton({
