@@ -1,8 +1,6 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 
-export const runtime = "edge";
-
 const CLASS_COLOR: Record<string, string> = {
   builder: "#6366f1", creator: "#a855f7", leader: "#f59e0b",
   explorer: "#22c55e", supporter: "#3b82f6",
